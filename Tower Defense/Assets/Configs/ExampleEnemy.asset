@@ -9,8 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5955f98bad1bfa4cacb6ca7cae3e8f9, type: 3}
+  m_Script: {fileID: 11500000, guid: f400e56fd2fbf0740beca2fb4521deee, type: 3}
   m_Name: ExampleEnemy
   m_EditorClassIdentifier: 
-  _maxHealth: 100
-  _prefab: {fileID: 8586182048236086135, guid: f54ed08fef272e94686f05a119441d16, type: 3}
+  _prefab: {fileID: 6852530449725606451, guid: af631052fd7bbb84abe98ebcc29650db, type: 3}

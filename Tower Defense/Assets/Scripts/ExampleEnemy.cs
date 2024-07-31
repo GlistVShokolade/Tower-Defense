@@ -1,16 +1,12 @@
 ﻿using UnityEngine;
 
-public class ExampleEnemy : HealthEnemy, IDamagable
+public class ExampleEnemy : Enemy, IDamagable
 {
-    public void ApplyDamage(float damage)
-    {
-        Debug.Log("Я маслину поймал!");
-    }
+    [SerializeField] private Health _health;
 
-    public override void Init()
+    public void TakeDamage(int damage)
     {
-        base.Init();
-
-        Debug.Log("Инициализация врага окончина!");
+        Debug.Log("Враг получил урон");
+        _health.TakeDamage(damage);
     }
 }

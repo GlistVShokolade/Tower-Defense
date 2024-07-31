@@ -1,60 +1,57 @@
-using System;
-using System.Collections;
-using TMPro.EditorUtilities;
+ï»¿using System.Collections;
 using UnityEngine;
 
-public class TowerAttack : IDisposable, IInit
+public class TowerAttack : MonoBehaviour
 {
-    private readonly float _damage;
+    private Coroutine _coroutine;
+    private WaitForSeconds _wait;
 
-    private readonly TowerVision _vision;
-    private readonly MonoBehaviour _context;
-    private readonly WaitForSeconds _wait;
+    [SerializeField] private TowerVision _vision;
+    [Space]
+    [SerializeField] private int _damage;
+    [SerializeField] private float _speed;
 
-    public event Action AttackPerformed;
-
-    public TowerAttack(MonoBehaviour context, TowerVision vision, float damage, float speed)
+    private void Awake()
     {
-        _damage = damage >= 0f ? damage : throw new ArgumentOutOfRangeException(nameof(damage));
-
-        _vision = vision ?? throw new NullReferenceException(nameof(vision));
-        _context = context ?? throw new NullReferenceException(nameof(context));
-
-        _wait = new WaitForSeconds(speed);
-
-        Init();
+        _wait = new WaitForSeconds(_speed);
     }
 
-    public IEnumerator AttackLoop(IDamagable target)
+    private void OnEnable()
+    {
+        _vision.TargetDetected += StopAttack;
+        _vision.TargetDetected += StartAttack;
+    }
+
+    private void OnDisable()
+    {
+        _vision.TargetDetected -= StopAttack;
+        _vision.TargetDetected -= StartAttack;
+    }
+
+    public void StartAttack(IDamagable damagable)
+    {
+        _coroutine = StartCoroutine(AttackLoop(damagable));
+    }
+
+    public void StopAttack(IDamagable damagable)
+    {
+        if (_coroutine == null)
+        {
+            return;
+        }
+
+        StopCoroutine(_coroutine);
+    }
+
+    private IEnumerator AttackLoop(IDamagable damagable)
     {
         while (true)
         {
-            Attack(target);
-
             yield return _wait;
+             
+            Attack(damagable);
         }
     }
 
-    private void StartAttack(IDamagable target) => _context.StartCoroutine(AttackLoop(target));
-
-    private void StopAttack() => _context.StopCoroutine(AttackLoop(null));
-
-    private void Attack(IDamagable damagable)
-    {
-        Debug.Log("Àòàêà ñîâåðøåííà");
-
-        damagable.ApplyDamage(_damage);
-    }
-
-    public void Dispose()
-    {
-        _vision.EnemyDetected -= StartAttack;
-        _vision.EnemyLosted -= StopAttack;
-    }
-
-    public void Init()
-    {
-        _vision.EnemyDetected += StartAttack;
-        _vision.EnemyLosted += StopAttack;
-    }
+    private void Attack(IDamagable damagable) => damagable.TakeDamage(_damage);
 }

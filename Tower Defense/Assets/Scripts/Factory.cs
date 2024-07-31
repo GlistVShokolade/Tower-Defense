@@ -9,14 +9,23 @@ public abstract class Factory<Config, GameObject> : MonoBehaviour
 
     public IReadOnlyList<GameObject> Pool => _pool;
 
-    public abstract GameObject Get(Config config);
-    public abstract void Remove(GameObject gameObject);
-
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
         }
+    }
+
+    public abstract GameObject Create(Config config);
+
+    public virtual void Delete(GameObject gameObject)
+    {
+        if (_pool.Contains(gameObject) == false)
+        {
+            throw new KeyNotFoundException(nameof(gameObject));
+        }
+
+        _pool.Remove(gameObject);
     }
 }

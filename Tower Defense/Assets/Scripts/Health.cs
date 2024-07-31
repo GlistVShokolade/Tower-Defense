@@ -1,11 +1,17 @@
 using System;
+using UnityEngine;
 
-public sealed class Health
+public class Health : MonoBehaviour
 {
-    private float _currentHealth;
-    private readonly float _maxHealth;
+    public event Action HealthChanged;
+    public event Action HealthOver;
 
-    public float CurrentHealth
+    [SerializeField, Min(0)] private int _maxHealth;
+    [SerializeField, Min(0)] private int _startHealth;
+
+    private int _currentHealth;
+
+    public int CurrentHealth
     {
         get
         {
@@ -13,29 +19,27 @@ public sealed class Health
         }
         private set
         {
-            _currentHealth = Math.Clamp(value, 0f, _maxHealth);
+            _currentHealth = Math.Clamp(value, 0, _maxHealth);
         }
     }
 
-    public event Action HealthChanged;
-    public event Action HealthOver;
+    public int MaxHealth => _maxHealth;
 
-    public Health(float maxHealth)
+    private void Start()
     {
-        if (maxHealth < 0f)
-        {
-            throw new ArgumentOutOfRangeException(nameof(maxHealth));
-        }
-
-        _maxHealth = maxHealth;
-        _currentHealth = maxHealth;
+        CurrentHealth = _startHealth;
 
         HealthChanged?.Invoke();
+
+        if (CurrentHealth == 0f)
+        {
+            HealthOver?.Invoke();
+        }
     }
 
-    public void ApplyDamage(float damage)
+    public void TakeDamage(int damage)
     {
-        if (damage < 0f)
+        if (damage < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(damage));
         }
@@ -44,20 +48,20 @@ public sealed class Health
 
         HealthChanged?.Invoke();
 
-        if (_currentHealth == 0f)
+        if (CurrentHealth == 0f)
         {
             HealthOver?.Invoke();
         }
     }
 
-    public void AddHealth(float amount)
+    public void ApplyHealth(int health)
     {
-        if (amount < 0f)
+        if (health < 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(amount));
+            throw new ArgumentOutOfRangeException(nameof(health));
         }
 
-        CurrentHealth += amount;
+        CurrentHealth += health;
 
         HealthChanged?.Invoke();
     }

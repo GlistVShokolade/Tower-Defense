@@ -1,30 +1,41 @@
-using System;
+﻿using System;
 using System.Collections;
 using UnityEngine;
 
-public class TowerVision
+public class TowerVision : MonoBehaviour
 {
-    private readonly Transform _towerTransform;
+    private Coroutine _coroutine;
+    private WaitForSeconds _wait;
 
-    private readonly float _viewDistance;
+    [SerializeField] private Transform _viewpoint;
+    [Space]
+    [SerializeField] private float _viewDistance;
+    [SerializeField] private float _researchTime;
 
-    public event Action<IDamagable> EnemyDetected;
-    public event Action EnemyLosted;
+    public Vector3 ViewpointPosition => _viewpoint.position;
 
-    private readonly WaitForSeconds _wait;
+    public event Action<IDamagable> TargetDetected;
 
-    public Vector3 TowerPosition => _towerTransform.position;
-
-    public TowerVision(float viewDistance, float researchSpeed, Transform towerTransform)
+    private void Awake()
     {
-        _viewDistance = viewDistance >= 0f ? viewDistance : throw new ArgumentOutOfRangeException(nameof(viewDistance));
-
-        _towerTransform = towerTransform ?? throw new NullReferenceException(nameof(towerTransform));
-
-        _wait = new WaitForSeconds(researchSpeed);
+        _wait = new WaitForSeconds(_researchTime);
     }
 
-    public IEnumerator SearchLoop()
+    public void StartResearch()
+    {
+        _coroutine = StartCoroutine(ResearchLoop());
+    }
+    public void StopResearch()
+    {
+        if (_coroutine == null)
+        {
+            return;
+        }
+
+        StopCoroutine(ResearchLoop());
+    }
+
+    private IEnumerator ResearchLoop()
     {
         while (true)
         {
@@ -36,22 +47,23 @@ public class TowerVision
 
     private void SearchTarget()
     {
-        foreach (var enemy in EnemyFactory.Instance.Pool)
+        foreach (var target in EnemyFactory.Instance.Pool)
         {
-            var enemyPosition = enemy.transform.position;
-            var distance = Vector3.SqrMagnitude(enemyPosition - TowerPosition);
+            var enemyPosition = target.transform.position;
+            var distance = Vector3.Distance(ViewpointPosition, enemyPosition);
 
             if (distance > _viewDistance)
             {
                 continue;
             }
-            if (enemy.TryGetComponent(out IDamagable damagable) == false)
+            if (target.TryGetComponent(out IDamagable damagable) == false)
             {
                 continue;
             }
 
-            EnemyLosted?.Invoke();
-            EnemyDetected?.Invoke(damagable);
+            TargetDetected?.Invoke(damagable);
+
+            Debug.Log("Враг был найден! Событие было вызвано!");
         }
     }
 }

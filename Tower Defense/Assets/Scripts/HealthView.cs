@@ -1,18 +1,14 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public abstract class HealthView : MonoBehaviour
 {
-    private Health _health;
+    [SerializeField] private Health _health;
 
-    public void Initialize(Health health)
-    {
-        _health = health ?? throw new NullReferenceException(nameof(health));
-    }
+    protected Health Health => _health;
 
     private void OnEnable()
     {
-        _health.HealthChanged += UpdateValue;
+        _health.HealthChanged += UpdateValue; 
     }
 
     private void OnDisable()
