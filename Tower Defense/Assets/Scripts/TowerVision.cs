@@ -21,6 +21,11 @@ public class TowerVision : MonoBehaviour
         _wait = new WaitForSeconds(_researchTime);
     }
 
+    private void Start()
+    {
+        StartResearch();
+    }
+
     public void StartResearch()
     {
         _coroutine = StartCoroutine(ResearchLoop());

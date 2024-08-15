@@ -1,19 +1,21 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.AI;
 
-[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(NavMeshAgent))]
 public class EnemyMove : MonoBehaviour
 {
     private int _currentIndex;
 
-    private Rigidbody _rigidbody;
+    private NavMeshAgent _agent;
 
     private int WaypointCount => WaypointContainer.Instance.Waypoints.Length;
     private Vector3 WaypointPosition => WaypointContainer.Instance.Waypoints[_currentIndex].position;
+    private Vector3 AgentPosition => _agent.transform.position;
 
     private void Awake()
     {
-        _rigidbody = GetComponent<Rigidbody>();
+        _agent = GetComponent<NavMeshAgent>();
     }
 
     private void Start()
@@ -25,11 +27,9 @@ public class EnemyMove : MonoBehaviour
     {
         while (true)
         {
-            Vector3 direction = WaypointPosition - _rigidbody.position;
+            Move(WaypointPosition);
 
-            Move(direction);
-
-            if (Vector3.SqrMagnitude(_rigidbody.position - WaypointPosition) < 0.3f)
+            if (Vector3.SqrMagnitude(AgentPosition - WaypointPosition) < _agent.stoppingDistance)
             {
                 _currentIndex++;
 
@@ -43,8 +43,8 @@ public class EnemyMove : MonoBehaviour
         }
     }
 
-    private void Move(Vector3 velocity)
+    private void Move(Vector3 target)
     {
-        _rigidbody.velocity = velocity;
+        _agent.SetDestination(target);
     }
 }
